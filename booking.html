@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Booking | Mini Mahal</title>
+
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css">
+</head>
+
+
+
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">Sri Sai Krishna Mini Mahal</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="facilities.html">Facilities</a>
+    <a href="booking.html">Booking</a>
+    <a href="contact.html">Contact</a>
+    <a href="admin.html">Admin</a>
+  </nav>
+</header>
+
+<!-- PAGE CONTENT HERE -->
+
+<section class="booking">
+
+<h2>💮Check Date & Book Your Event</h2>
+<p class="booking-sub">
+Fill the form or message us on WhatsApp for quick booking.
+</p>
+
+<div class="booking-container">
+
+<div class="booking-form">
+
+<div class="card-title">
+  <i class="fa fa-calendar-check"></i>
+  <span>Book Your Event</span>
+</div>
+
+<form id="bookingForm">
+
+<div class="input-box">
+<i class="fa fa-calendar"></i>
+<input type="date" id="bookingdate" required>
+</div>
+
+<div class="input-box">
+<i class="fa fa-user"></i>
+<input type="text" id="username" placeholder="Your Name" required>
+</div>
+
+<div class="input-box select-box">
+  <i class="fa fa-user"></i>
+  <select id="eventType" required>
+    <option value="" disabled selected hidden>EventType</option> 
+    <option value="Wedding">Wedding</option>
+    <option value="Birthday">Birthday</option>
+    <option value="Engagement">Engagement</option>
+    <option value="Other">Others</option>
+</select>
+</div>
+
+<div class="input-box select-box">
+  <i class="fa fa-user"></i>
+  <select id="timings" required>
+    <option value="" disabled selected hidden>Timings</option> 
+    <option value="Early Morning">Early Morning</option>
+    <option value="Mid Morning">Mid Morning</option>
+    <option value="Afternoon">Afternoon</option>
+    <option value="Evening">Evening</option>
+</select>
+</div>
+
+<div class="input-box">
+<i class="fa fa-phone"></i>
+<input type="tel" id="userphone" placeholder="Phone Number" required>
+</div>
+
+<div class="input-box">
+    <i class="fa fa-envelope"></i>
+    <input
+        type="email"
+        id="email"
+        name="email"
+        placeholder="Email Address"
+        required
+    >
+</div>
+
+<button class="btn" type="submit">Book Mahal</button>
+
+</form>
+
+</div>
+
+<div class="calendar-wrapper">
+
+<div class="card-title">
+  <i class="fa fa-calendar"></i>
+  <span>Available Dates</span>
+</div>
+
+    <select id="calendarTiming">
+        <option value="">Select Timing</option>
+        <option value="Early Morning">Early Morning</option>
+        <option value="Mid Morning">Mid Morning</option>
+        <option value="Afternoon">Afternoon</option>
+        <option value="Evening">Evening</option>
+    </select>
+
+    <div id="calendar"></div>
+
+</div>
+
+<div class="contact-options">
+
+<!-- WhatsApp Card -->
+<div class="whatsapp-box">
+
+  <div class="card-title">
+    <i class="fab fa-whatsapp"></i>
+    <span>Book via WhatsApp</span>
+  </div>
+
+  <p>
+    Message us on WhatsApp to check date availability.
+  </p>
+
+  <a href="https://wa.me/919344164909"
+     target="_blank"
+     class="whatsapp-btn">
+     Chat on WhatsApp
+  </a>
+
+</div>
+
+<!-- Call Card -->
+<div class="call-box">
+
+  <div class="card-title">
+    <i class="fa fa-phone"></i>
+    <span>Call for Booking</span>
+  </div>
+
+  <p>
+    Call us to check date and booking details.
+  </p>
+
+  <a href="tel:+919344164909" class="call-btn">
+    Call Now
+  </a>
+
+</div>
+
+</section>
+
+<!-- FOOTER -->
+<footer class="premium-footer">
+
+  <div class="footer-overlay"></div>
+
+  <div class="footer-container">
+
+    <!-- Location -->
+    <div class="footer-column">
+      <h3>OUR LOCATION</h3>
+      <h4>SRI SAI KRISHNA MINI MAHAL</h4>
+
+      <p>
+        W9FC+4V7, Kachalan Street,<br>
+        Walajapet, Tamil Nadu 632513
+      </p>
+
+      <a href="https://www.google.com/maps/search/Sai+Krishna+Mini+Mahal+Walajapet+ranipet+district/@12.9225612,79.2206386,12z?entry=ttu&g_ep=EgoyMDI2MDYwMy4xIKXMDSoASAFQAw%3D%3D" 
+target="_blank" 
+class="directions">
+CLICK HERE TO GET DIRECTIONS
+</a>
+
+      <div class="social-icons">
+        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="#"><i class="fab fa-facebook-f"></i></a>
+        <a href="#"><i class="fab fa-youtube"></i></a>
+        <a href="https://wa.me/919000000000"><i class="fab fa-whatsapp"></i></a>
+      </div>
+
+    </div>
+
+    <!-- Contact -->
+    <div class="footer-column">
+      <h3>CONTACT INFORMATION</h3>
+      <p><strong>Phone Numbers</strong></p>
+      <p>+91 9000000000</p>
+      <p>+91 9000000001</p>
+    </div>
+
+    <!-- Email -->
+    <div class="footer-column">
+      <h3>EMAIL & WORKING HOURS</h3>
+      <p><strong>Email</strong></p>
+      <p>sai@minimahal.com</p>
+
+      <p class="hours-title"><strong>Hours of Operation</strong></p>
+      <p>9 AM – 7:30 PM</p>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    © 2026 Mini Mahal. All Rights Reserved |
+    <a href="#">Privacy Policy</a>
+  </div>
+
+</footer>
+
+<script src="script.js"></script>
+<script type="module" src="js/booking.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+
+<script src="https://unpkg.com/scrollreveal"></script>
+<script>
+  ScrollReveal().reveal('.reveal', { delay: 200, distance: '50px', origin: 'bottom', duration: 1000, easing: 'cubic-bezier(0.5, 0, 0, 1)' });
+  ScrollReveal().reveal('.reveal-left', { delay: 200, distance: '50px', origin: 'left', duration: 1000 });
+  ScrollReveal().reveal('.reveal-right', { delay: 200, distance: '50px', origin: 'right', duration: 1000 });
+</script>
+
+</body>
+</html>

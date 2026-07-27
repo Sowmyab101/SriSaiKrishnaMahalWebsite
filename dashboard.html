@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dashboard</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+</head>
+
+<body>
+
+<!-- 🔐 PROTECT DASHBOARD -->
+<script>
+window.addEventListener("load", function(){
+  if(localStorage.getItem("adminLoggedIn") !== "true"){
+    window.location.href = "admin.html";
+  }
+});
+</script>
+
+<div class="admin-container">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <h2>Mini Mahal</h2>
+
+    <a href="dashboard.html">Dashboard</a>
+    <a href="BookingsLists.html">Bookings</a>
+    <a href="gallery-admin.html">Gallery</a>
+    <a href="#" onclick="logout()">Logout</a>
+  </div>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+  <h1>Admin Dashboard</h1>
+
+  <!-- DASHBOARD STATS -->
+  <div class="dashboard-stats">
+
+    <div class="stat-card">
+      <i class="fas fa-calendar-check"></i>
+      <div>
+        <h3>Total Bookings</h3>
+        <p id="totalBookings">0</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <i class="fas fa-images"></i>
+      <div>
+        <h3>Gallery Images</h3>
+        <p id="galleryCount">0</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- UPCOMING EVENTS -->
+  <div class="dashboard-card">
+
+    <h2>
+      <i class="fas fa-calendar-alt"></i>
+      Upcoming Events
+    </h2>
+
+    <div id="upcomingEvents">
+      <!-- Events will load here -->
+    </div>
+
+  </div>
+
+  <!-- BOOKING TABLE -->
+  <div class="table-card">
+
+    <h2>
+      <i class="fas fa-list"></i>
+      Booking List
+    </h2>
+
+    <table id="bookingTable">
+
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>Date</th>
+          <th>Timings</th>
+          <th>Email ID</th>
+        </tr>
+      </thead>
+
+      <tbody></tbody>
+
+    </table>
+
+    <button
+      type="button"
+      class="btn"
+      onclick="downloadExcel()">
+      Download Excel
+    </button>
+
+  </div>
+
+</div>
+
+
+
+<!-- LOGOUT FUNCTION -->
+<script>
+function logout(){
+  localStorage.removeItem("adminLoggedIn");
+  window.location.href = "admin.html";
+}
+</script>
+
+
+
+<script type="module">
+  
+</script>
+<script src="script.js"></script>
+<script type="module" src="js/dashboard.js"></script>
+
+</body>
+</html>

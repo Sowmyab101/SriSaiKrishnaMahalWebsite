@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Gallery Admin</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+
+<div class="admin-container">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+<h2>Mini Mahal</h2>
+
+<a href="dashboard.html">Dashboard</a>
+<a href="BookingsLists.html">Bookings</a>
+<a href="gallery-admin.html">Gallery</a>
+<a href="admin.html" onclick="logout()">Logout</a>
+</div>
+
+<div class="admin-content">
+
+    <h1>Manage Gallery</h1>
+
+    <!-- Upload Card -->
+    <div class="dashboard-card">
+
+        <h2>
+            <i class="fas fa-upload"></i>
+            Upload Content
+        </h2>
+
+        <select id="uploadType" onchange="toggleFields()">
+            <option value="">Select Upload Type</option>
+            <option value="gallery">Gallery Upload</option>
+            <option value="facilities">Facilities Upload</option>
+        </select>
+
+        <div id="gallerySection">
+
+            <h3>Upload Gallery Image</h3>
+
+            <input type="file" id="imageUpload">
+
+            <button class="btn" onclick="uploadImage()">
+                Upload Image
+            </button>
+
+        </div>
+
+        <div id="facilitySection" style="display:none;">
+
+            <h3>Add Facility</h3>
+
+            <input
+                type="text"
+                id="facilityName"
+                placeholder="Facility Name">
+
+            <textarea
+                id="facilityDescription"
+                placeholder="Facility Description">
+            </textarea>
+
+            <input
+                type="file"
+                id="facilityImage">
+
+            <button class="btn" onclick="addFacility()">
+                Add Facility
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- Gallery Preview -->
+    <div class="dashboard-card">
+
+        <h2>
+            <i class="fas fa-images"></i>
+            Gallery Images
+        </h2>
+
+        <div id="galleryPreview" class="gallery-grid"></div>
+
+    </div>
+
+    <!-- Facilities Preview -->
+    <div class="dashboard-card">
+
+        <h2>
+            <i class="fas fa-building"></i>
+            Facilities
+        </h2>
+
+        <div id="facilityPreview" class="gallery-grid"></div>
+
+    </div>
+
+</div>
+
+
+
+<script src="script.js"></script>
+</body>
+</html>
