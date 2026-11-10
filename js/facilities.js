@@ -1,25 +1,33 @@
-function loadFacilities() {
+import {
+    db,
+    collection,
+    getDocs
+} from "./firebase.js";
 
-    const facilities =
-        JSON.parse(localStorage.getItem("facilitiesData")) || [];
+async function loadFacilities() {
 
     const container =
         document.getElementById("facilitiesContainer");
 
     container.innerHTML = "";
 
-    facilities.forEach(item => {
+    const snapshot =
+        await getDocs(collection(db, "facilities"));
+
+    snapshot.forEach((doc) => {
+
+        const facility = doc.data();
 
         container.innerHTML += `
             <div class="facility-card">
 
-                <img src="${item.image}" alt="${item.name}">
+                <img src="${facility.imageUrl}" alt="${facility.name}">
 
                 <div class="facility-info">
 
-                    <h3>${item.name}</h3>
+                    <h3>${facility.name}</h3>
 
-                    <p>${item.description}</p>
+                    <p>${facility.description}</p>
 
                 </div>
 

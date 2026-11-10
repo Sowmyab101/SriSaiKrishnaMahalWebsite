@@ -1,89 +1,181 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  const firebaseConfig = {
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+
+import {
+    getFirestore,
+    collection,
+    onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+
+const firebaseConfig = {
     apiKey: "AIzaSyBj0vfVWokM6qSBXVIyrNB-YZrOTMLANmM",
     authDomain: "myfirstproject-1cc9f.firebaseapp.com",
     projectId: "myfirstproject-1cc9f"
-  };
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 
-  const tableBody = document.querySelector("#bookingTable tbody");
+// HTML elements
+const tableBody = document.querySelector("#bookingTable tbody");
+const upcomingEventsDiv = document.getElementById("upcomingEvents");
 
 
+// -------------------------------------
+// 1. REAL-TIME BOOKING COUNT & TABLE
+// -------------------------------------
 
-  try {
-    const querySnapshot = await getDocs(collection(db, "bookings"));
+onSnapshot(
+    collection(db, "bookings"),
 
-    document.getElementById("totalBookings").textContent = querySnapshot.size;
-    //document.getElementById("galleryCount").textContent = querySnapshot.size;
+    (snapshot) => {
 
-    const upcomingEventsDiv = document.getElementById("upcomingEvents");
-    let upcomingBookings = [];
+        // Update total booking count
+        document.getElementById("totalBookings").textContent =
+            snapshot.size;
 
-    
+        let upcomingBookings = [];
 
-    // Clear table before adding rows
-    tableBody.innerHTML = "";
+        // Clear existing table
+        tableBody.innerHTML = "";
 
-    querySnapshot.forEach((doc) => {
-        const data = doc.data();
+        snapshot.forEach((doc) => {
 
-        // Booking table
-        const row = `
-        <tr>
-            <td>${data.name || "N/A"}</td>
-            <td>${data.phone || "N/A"}</td>
-            <td>${data.date || "N/A"}</td>
-            <td>${data.timings || "N/A"}</td>
-            <td>${data.email || "N/A" } </td>
-        </tr>
-        `;
+            const data = doc.data();
 
-        tableBody.innerHTML += row;
+            // Create table row safely
+            const row = document.createElement("tr");
 
-        // Upcoming events
-        if (data.date) {
-            const bookingDate = new Date(data.date);
-            const today = new Date();
+            const values = [
+                data.name || "N/A",
+                data.phone || "N/A",
+                data.date || "N/A",
+                data.timings || "N/A",
+                data.email || "N/A"
+            ];
 
-            today.setHours(0, 0, 0, 0);
-            bookingDate.setHours(0, 0, 0, 0);
+            values.forEach((value) => {
+                const cell = document.createElement("td");
+                cell.textContent = value;
+                row.appendChild(cell);
+            });
 
-            if (bookingDate >= today) {
-                upcomingBookings.push(data);
+            tableBody.appendChild(row);
+
+
+            // Check upcoming bookings
+            if (data.date) {
+
+                const bookingDate = new Date(data.date);
+                const today = new Date();
+
+                today.setHours(0, 0, 0, 0);
+                bookingDate.setHours(0, 0, 0, 0);
+
+                if (bookingDate >= today) {
+                    upcomingBookings.push(data);
+                }
             }
+
+        });
+
+
+        // Sort upcoming events
+        upcomingBookings.sort(
+            (a, b) => new Date(a.date) - new Date(b.date)
+        );
+
+
+        // Display next 5 events
+        const nextEvents = upcomingBookings.slice(0, 5);
+
+        upcomingEventsDiv.innerHTML = "";
+
+        if (nextEvents.length === 0) {
+
+            upcomingEventsDiv.textContent =
+                "No upcoming events found.";
+
+        } else {
+
+            nextEvents.forEach((event) => {
+
+                const eventItem = document.createElement("div");
+                eventItem.className = "event-item";
+
+                const heading = document.createElement("h4");
+                heading.textContent = event.name || "Guest";
+
+                const details = [
+                    `📅 ${event.date}`,
+                    `🎉 ${event.eventType || "Event"}`,
+                    `⏰ ${event.timings || "N/A"}`,
+                    `📧 ${event.email || "N/A"}`
+                ];
+
+                eventItem.appendChild(heading);
+
+                details.forEach((detail) => {
+                    const p = document.createElement("p");
+                    p.textContent = detail;
+                    eventItem.appendChild(p);
+                });
+
+                upcomingEventsDiv.appendChild(eventItem);
+
+            });
+
         }
-    });
 
-    // Sort nearest first
-    upcomingBookings.sort(
-        (a, b) => new Date(a.date) - new Date(b.date)
-    );
+    },
 
-    // Show next 5 events
-    const nextEvents = upcomingBookings.slice(0, 5);
+    (error) => {
+        console.error("Booking listener error:", error);
+    }
+);
 
-    let eventsHTML = "";
 
-    nextEvents.forEach((event) => {
-        eventsHTML += `
-            <div class="event-item">
-                <h4>${event.name || "Guest"}</h4>
-                <p>📅 ${event.date}</p>
-                <p>🎉 ${event.eventType || "Event"}</p>
-                <p>⏰ ${event.timings || "N/A"}</p>
-                <p>📧 ${event.email || "N/A"}</p>
-            </div>
-        `;
-    });
+// -------------------------------------
+// 2. REAL-TIME GALLERY IMAGE COUNT
+// -------------------------------------
 
-    upcomingEventsDiv.innerHTML =
-        eventsHTML || "<p>No upcoming events found.</p>";
+onSnapshot(
+    collection(db, "gallery"),
 
-} catch (error) {
-    console.error(error);
-    alert("Error loading bookings");
-}
+    (snapshot) => {
+
+        document.getElementById("galleryCount").textContent =
+            snapshot.size;
+
+        console.log("Gallery count updated:", snapshot.size);
+
+    },
+
+    (error) => {
+        console.error("Gallery listener error:", error);
+    }
+);
+
+
+// -------------------------------------
+// 3. REAL-TIME FACILITIES IMAGE COUNT
+// -------------------------------------
+
+onSnapshot(
+    collection(db, "facilities"),
+
+    (snapshot) => {
+
+        document.getElementById("facilitiesCount").textContent =
+            snapshot.size;
+
+        console.log("Facilities count updated:", snapshot.size);
+
+    },
+
+    (error) => {
+        console.error("Facilities listener error:", error);
+    }
+);

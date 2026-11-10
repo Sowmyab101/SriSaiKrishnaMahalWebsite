@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="style.css">
 </head>
 
-
+<body>
 <div class="admin-container">
 
 <!-- SIDEBAR -->
@@ -40,8 +40,7 @@
 
             <h3>Upload Gallery Image</h3>
 
-            <input type="file" id="imageUpload">
-
+            <input type="file" id="imageUpload">            
             <button class="btn" onclick="uploadImage()">
                 Upload Image
             </button>
@@ -65,7 +64,6 @@
             <input
                 type="file"
                 id="facilityImage">
-
             <button class="btn" onclick="addFacility()">
                 Add Facility
             </button>
@@ -103,5 +101,7 @@
 
 
 <script src="script.js"></script>
+<script type="module" src="js/gallery-admin.js"></script>
+<script type="module" src="js/auth.js"></script>
 </body>
 </html>

@@ -1,3 +1,12 @@
+const menuToggle = document.getElementById("menuToggle");
+const navbar = document.getElementById("navbar");
+
+if (menuToggle && navbar) {
+    menuToggle.addEventListener("click", () => {
+        navbar.classList.toggle("active");
+    });
+}
+
 
 let allBookings = [];
 // Smooth Scroll
@@ -46,42 +55,13 @@ if(toggle && floating){
 }
 
 
-// ADMIN LOGIN
-function login(){
-  let Adminusername = document.getElementById("Adminusername").value;
-  let password = document.getElementById("password").value;
-
-  if(Adminusername === "admin" && password === "SriKrish#2026"){
-    localStorage.setItem("adminLoggedIn","true");
-
-    // ✅ Redirect to dashboard page
-    window.location.href = "dashboard.html";
-  }
-  else{
-    alert("Invalid Login");
-  }
-}
 
 
-function logout(){
-  localStorage.removeItem("adminLoggedIn");
 
-  // ✅ Go back to login page
-  window.location.href = "admin.html";
-}
 
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  // Booking Form
-  
-
-  // Load bookings into table
-  
-
-  // Booking count
-  
-  
 
   // Admin protection
   if (!localStorage.getItem("adminLoggedIn")) {
@@ -117,193 +97,49 @@ function toggleFields() {
 
 
 
-function uploadImage() {
+async function uploadImage() {
 
     const file = document.getElementById("imageUpload").files[0];
 
-    if(!file){
-        alert("Select an image");
+    if (!file) {
+        alert("Please select an image.");
         return;
     }
 
-    const reader = new FileReader();
+    const formData = new FormData();
 
-    reader.onload = function(e){
+    formData.append("image", file);
+    formData.append("type", "gallery");
 
-        const type = document.getElementById("uploadType").value;
+    try {
 
-        const imageData = {
-            image: e.target.result,
-            type: type
-        };
+        const response = await fetch("https://mini-mahal-backend.onrender.com/upload", {
+            method: "POST",
+            body: formData
+        });
 
-        if(type === "facilities"){
-            imageData.name =
-                document.getElementById("facilityName").value;
+        const result = await response.json();
 
-            imageData.description =
-                document.getElementById("facilityDescription").value;
+        if (result.success) {
+            alert("🎉 Image uploaded successfully!");
+            console.log(result);
+
+            // We'll replace this with a preview refresh later.
+            document.getElementById("imageUpload").value = "";
+
+        } else {
+            alert(result.message);
         }
 
-        let images =
-            JSON.parse(localStorage.getItem("galleryData")) || [];
+    } catch (err) {
 
-        images.push(imageData);
+        console.error(err);
+        alert("Upload failed.");
 
-        localStorage.setItem(
-            "galleryData",
-            JSON.stringify(images)
-        );
-
-        alert("🎉 Image uploaded successfully!");
-        loadGalleryPreview();
-        document.getElementById("imageUpload").value = "";
-    };
-
-    reader.readAsDataURL(file);
-}
-
-function loadGalleryPreview(){
-
-    const container =
-        document.getElementById("galleryPreview");
-
-    if(!container) return;
-
-    const images =
-        JSON.parse(localStorage.getItem("galleryData")) || [];
-
-    container.innerHTML = "";
-
-    images.forEach((item,index)=>{
-
-        // Show only gallery images
-       
-
-        container.innerHTML += `
-        <div class="image-card">
-
-            <img src="${item.image}" width="200">
-
-            <div class="card-buttons">
-
-                <button class="delete-btn"
-                    onclick="deleteImage(${index})">
-                    Delete
-                </button>
-
-            </div>
-
-        </div>
-        `;
-    });
-}
-
-
-function loadFacilitiesAdmin() {
-
-    const container =
-        document.getElementById("facilityPreview");
-    
-    if(!container) return;
-
-    const facilities =
-        JSON.parse(localStorage.getItem("facilitiesData")) || [];
-
-    container.innerHTML = "";
-
-    facilities.forEach((facility,index)=>{
-
-        container.innerHTML += `
-        <div class="image-card">
-
-            <img src="${facility.image}" width="200">
-
-            <h3>${facility.name}</h3>
-
-            <p>${facility.description}</p>
-
-            <div class="card-buttons">
-
-                <button class="edit-btn"
-                    onclick="editFacility(${index})">
-                    Edit
-                </button>
-
-                <button class="delete-btn"
-                    onclick="deleteFacility(${index})">
-                    Delete
-                </button>
-
-            </div>
-
-        </div>
-        `;
-    });
-}
-
-function deleteImage(index){
-
-    let images =
-        JSON.parse(localStorage.getItem("galleryData")) || [];
-
-    images.splice(index,1);
-
-    localStorage.setItem(
-        "galleryData",
-        JSON.stringify(images)
-    );
-
-    loadGalleryPreview();
-}
-
-function deleteFacility(index){
-
-    let facilities =
-        JSON.parse(localStorage.getItem("facilitiesData")) || [];
-
-    facilities.splice(index,1);
-
-    localStorage.setItem(
-        "facilitiesData",
-        JSON.stringify(facilities)
-    );
-
-    loadFacilitiesAdmin();
-}
-
-function editFacility(index){
-
-    let facilities =
-        JSON.parse(localStorage.getItem("facilitiesData")) || [];
-
-    let facility = facilities[index];
-
-    const newName = prompt(
-        "Edit Facility Name",
-        facility.name
-    );
-
-    const newDescription = prompt(
-        "Edit Description",
-        facility.description
-    );
-
-    if(newName !== null && newDescription !== null){
-
-        facility.name = newName;
-        facility.description = newDescription;
-
-        facilities[index] = facility;
-
-        localStorage.setItem(
-            "facilitiesData",
-            JSON.stringify(facilities)
-        );
-
-        loadFacilitiesAdmin();
     }
+
 }
+
 
 function downloadExcel(){
 
@@ -336,62 +172,82 @@ function downloadExcel(){
   window.URL.revokeObjectURL(url);
 }
 
-function addFacility() {
+async function addFacility() {
 
-    const name =
-        document.getElementById("facilityName").value;
+    const name = document.getElementById("facilityName").value.trim();
 
-    const description =
-        document.getElementById("facilityDescription").value;
+    const description = document.getElementById("facilityDescription").value.trim();
 
-    
+    const file = document.getElementById("facilityImage").files[0];
 
-    const file =
-        document.getElementById("facilityImage").files[0];
-
-    if (!file) {
-        alert("Select image");
+    if (!name) {
+        alert("Please enter the facility name.");
         return;
     }
 
-    const reader = new FileReader();
+    if (!description) {
+        alert("Please enter the facility description.");
+        return;
+    }
 
-    reader.onload = function(e) {
+    if (!file) {
+        alert("Please select an image.");
+        return;
+    }
 
-        const facilities =
-            JSON.parse(localStorage.getItem("facilitiesData")) || [];
+    const formData = new FormData();
 
-        facilities.push({
-            name: name,
-            description: description,
-            image: e.target.result
+    formData.append("image", file);
+    formData.append("type", "facilities");
+    formData.append("name", name);
+    formData.append("description", description);
+
+    try {
+
+        const response = await fetch("https://mini-mahal-backend.onrender.com/upload", {
+
+            method: "POST",
+            body: formData
+
         });
 
-        localStorage.setItem(
-            "facilitiesData",
-            JSON.stringify(facilities)
-        );
+        const result = await response.json();
 
-        alert("Facility Added");
-        loadFacilitiesAdmin();
-    };
+        if (result.success) {
 
-    reader.readAsDataURL(file);
+            alert("🎉 Facility added successfully!");
+
+            // Clear form
+            document.getElementById("facilityName").value = "";
+            document.getElementById("facilityDescription").value = "";
+            document.getElementById("facilityImage").value = "";
+
+            // Refresh admin preview
+            if (typeof loadFacilitiesPreview === "function") {
+                loadFacilitiesPreview();
+            }
+
+        } else {
+
+            alert(result.message);
+
+        }
+
+    } catch (err) {
+
+        console.error(err);
+        alert("Upload failed.");
+
+    }
+
 }
 
-window.onload = function() {
+window.onload = function () {
 
-    if(document.getElementById("galleryPreview")){
-        loadGalleryPreview();
-    }
-
-    if(document.getElementById("facilityPreview")){
-        loadFacilitiesAdmin();
-    }
-
-    if(document.getElementById("uploadType")){
+    if (document.getElementById("uploadType")) {
         toggleFields();
     }
+
 };
 
 
@@ -407,4 +263,3 @@ function resetSearch() {
     });
 
 }
-

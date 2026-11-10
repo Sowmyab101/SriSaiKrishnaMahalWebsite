@@ -1,21 +1,30 @@
-function loadGallery() {
+import {
+    db,
+    collection,
+    getDocs
+} from "./firebase.js";
+
+async function loadGallery() {
 
     const container =
         document.getElementById("galleryContainer");
 
-    const images =
-        JSON.parse(localStorage.getItem("galleryData")) || [];
-
     container.innerHTML = "";
 
-    images.forEach(item => {
+    const snapshot =
+        await getDocs(collection(db, "gallery"));
+
+    snapshot.forEach((doc) => {
+
+        const item = doc.data();
 
         container.innerHTML += `
             <div class="gallery-card">
-                <img src="${item.image}" alt="Gallery Image">
+                <img src="${item.imageUrl}" alt="Gallery Image">
             </div>
         `;
     });
+
 }
 
 loadGallery();

@@ -16,16 +16,25 @@
 
 <!-- HEADER -->
 <header>
-  <div class="logo">Sri Sai Krishna Mini Mahal</div>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="about.html">About</a>
-    <a href="gallery.html">Gallery</a>
-    <a href="facilities.html">Facilities</a>
-    <a href="booking.html">Booking</a>
-    <a href="contact.html">Contact</a>
-    <a href="admin.html">Admin</a>
-  </nav>
+
+    <div class="logo">
+        Sri Sai Krishna Mini Mahal
+    </div>
+
+    <div class="menu-toggle" id="menuToggle">
+        ☰
+    </div>
+
+    <nav id="navbar">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="facilities.html">Facilities</a>
+        <a href="booking.html">Booking</a>
+        <a href="contact.html">Contact</a>
+        <a href="admin.html">Admin</a>
+    </nav>
+
 </header>
 
 <!-- PAGE CONTENT HERE -->
@@ -39,17 +48,21 @@
 <i class="fas fa-user-shield admin-icon"></i>
 <h2>Admin Login</h2>
 
+
 <div class="input-box">
 <i class="fas fa-user"></i>
-<input type="text" id="Adminusername" placeholder="Username">
+<input type="text" id="Adminemail" placeholder="Adminemail" required>
 </div>
+
+
 
 <div class="input-box">
 <i class="fas fa-lock"></i>
-<input type="password" id="password" placeholder="Password">
+<input type="password" id="password" placeholder="Password" required>
 </div>
 
 <button class="btn" onclick="login()">Login</button>
+<p id="loginMessage"></p>
 
 </div>
 
@@ -80,10 +93,10 @@ CLICK HERE TO GET DIRECTIONS
 </a>
 
       <div class="social-icons">
-        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.instagram.com/srisaikrishnamahal?igsh=MTNlZm1wdnVnYnh1aw=="><i class="fab fa-instagram"></i></a>
         <a href="#"><i class="fab fa-facebook-f"></i></a>
         <a href="#"><i class="fab fa-youtube"></i></a>
-        <a href="https://wa.me/919000000000"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://wa.me/919344164909"><i class="fab fa-whatsapp"></i></a>
       </div>
 
     </div>
@@ -91,9 +104,8 @@ CLICK HERE TO GET DIRECTIONS
     <!-- Contact -->
     <div class="footer-column">
       <h3>CONTACT INFORMATION</h3>
-      <p><strong>Phone Numbers</strong></p>
-      <p>+91 9000000000</p>
-      <p>+91 9000000001</p>
+      <p><strong>Phone Number</strong></p>
+      <p>+91 93441 64909</p>
     </div>
 
     <!-- Email -->
@@ -116,6 +128,8 @@ CLICK HERE TO GET DIRECTIONS
 </footer>
 
 <script src="script.js"></script>
+<script type="module" src="js/auth.js"></script>
+<script src="https://unpkg.com/scrollreveal"></script>
 <script src="https://unpkg.com/scrollreveal"></script>
 <script>
   ScrollReveal().reveal('.reveal', { delay: 200, distance: '50px', origin: 'bottom', duration: 1000, easing: 'cubic-bezier(0.5, 0, 0, 1)' });

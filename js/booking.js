@@ -68,7 +68,7 @@ window.openPopup = function(){
     // ✅ SAVE BOOKING
     await addDoc(collection(db, "bookings"), booking);
     // Send email notification
-    const response = await fetch("http://localhost:3000/website-booking", {
+    const response = await fetch("https://mini-mahal-backend.onrender.com/website-booking", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -132,47 +132,132 @@ const calendar = new FullCalendar.Calendar(calendarEl, {
 
     initialView: "dayGridMonth",
 
-    height: 350,
+    height: 400,
 
-    dateClick: function(info){
+    dateClick: function(info) {
 
         document.getElementById("bookingdate").value =
             info.dateStr;
+
+    },
+
+    datesSet: function() {
+
+        // Reload availability whenever the user
+        // moves to another month
+        loadBookedDates();
 
     }
 
 });
 
 calendar.render();
+
+
 document.getElementById("calendarTiming")
-.addEventListener("change", loadBookedDates);
+    .addEventListener("change", loadBookedDates);
+
 
 async function loadBookedDates() {
 
     const selectedTiming =
         document.getElementById("calendarTiming").value;
 
-    if (!selectedTiming) return;
-
+    // Clear existing Available / Booked labels
     calendar.removeAllEvents();
 
-    const snapshot =
-        await getDocs(collection(db, "bookings"));
+    // User must select a timing first
+    if (!selectedTiming) return;
 
-    snapshot.forEach((doc) => {
 
-        const booking = doc.data();
+    try {
 
-        if (booking.timings === selectedTiming) {
+        // Get all bookings from Firebase
+        const snapshot =
+            await getDocs(collection(db, "bookings"));
 
-            calendar.addEvent({
-                start: booking.date,
-                title: "Booked",
-                color: "red"
-            });
+
+        // Store dates that are already booked
+        const bookedDates = new Set();
+
+
+        snapshot.forEach((doc) => {
+
+            const booking = doc.data();
+
+            if (booking.timings === selectedTiming) {
+
+                bookedDates.add(booking.date);
+
+            }
+
+        });
+
+
+        // Get the currently displayed month
+        const currentDate = calendar.getDate();
+
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+
+
+        // Number of days in the current month
+        const daysInMonth =
+            new Date(year, month + 1, 0).getDate();
+
+
+        // Today's date
+        const today = new Date();
+
+        today.setHours(0, 0, 0, 0);
+
+
+        // Add Available / Booked status
+        for (let day = 1; day <= daysInMonth; day++) {
+
+            const date = new Date(year, month, day);
+
+            const dateStr =
+                `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+
+            // Don't show "Available" for past dates
+            if (date < today) {
+                continue;
+            }
+
+
+            if (bookedDates.has(dateStr)) {
+
+                // 🔴 BOOKED
+                calendar.addEvent({
+    start: dateStr,
+    title: "🔴",
+    color: "transparent",
+    textColor: "#FF0000"
+});
+
+            } else {
+
+                // 🟢 AVAILABLE
+                calendar.addEvent({
+    start: dateStr,
+    title: "🟢",
+    color: "transparent",
+    textColor: "#25D366"
+});
+
+            }
 
         }
 
-    });
+    } catch (error) {
+
+        console.error(
+            "Error loading booking availability:",
+            error
+        );
+
+    }
 
 }
