@@ -4,6 +4,7 @@
 // --------------------------------------
 
 const API_URL = "https://mini-mahal-backend.onrender.com";
+const calendarTiming = document.getElementById("calendarTiming");
 
 // --------------------------------------
 // POPUP
@@ -156,7 +157,7 @@ if (calendarEl && typeof FullCalendar !== "undefined") {
 // CALENDAR TIMING CHANGE
 // --------------------------------------
 
-const calendarTiming = document.getElementById("calendarTiming");
+
 
 if (calendarTiming) {
 
