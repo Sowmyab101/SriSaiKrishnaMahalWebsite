@@ -1,166 +1,310 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import {
-  getFirestore,
-  collection,
-  getDocs,
-  deleteDoc,
-  updateDoc,
-  doc
+
+import {
+    auth,
+    db,
+    collection,
+    getDocs,
+    deleteDoc,
+    updateDoc,
+    doc,
+    onAuthStateChanged
+} from "./firebase.js";
+
+const ADMIN_UID = "3P67JQdgKndZydxkWmsNgdRWcEf1";
+
+let allBookings = [];
+
+const tableBody = document.getElementById("tableBody");
+const searchInput = document.getElementById("searchBooking");
+
+// --------------------------------------
+// LOAD BOOKINGS
+// --------------------------------------
+
+async function loadBookings() {
+    try {
+        tableBody.innerHTML = `
+            <tr><td colspan="7">Loading bookings...</td></tr>
+        `;
+
+        const snapshot = await getDocs(collection(db, "bookings"));
+
+        allBookings = snapshot.docs.map(document => ({
+            id: document.id,
+            ...document.data()
+        }));
+
+        console.log("Bookings loaded:", allBookings.length);
+
+        applySearch();
+
+    } catch (error) {
+        console.error("Error loading bookings:", error);
+
+        tableBody.innerHTML = `
+            <tr><td colspan="7">Unable to load bookings. Check console.</td></tr>
+        `;
+    }
 }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-const firebaseConfig = {
-  apiKey: "AIzaSyBj0vfVWokM6qSBXVIyrNB-YZrOTMLANmM",
-  authDomain: "myfirstproject-1cc9f.firebaseapp.com",
-  projectId: "myfirstproject-1cc9f"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const tableBody = document.querySelector("#bookingTable tbody");
 
-try {
-  const querySnapshot = await getDocs(collection(db, "bookings"));
-  querySnapshot.forEach((bookingDoc) => {
+// --------------------------------------
+// DISPLAY BOOKINGS
+// --------------------------------------
 
-  const data = bookingDoc.data();
-  const bookingId = bookingDoc.id;
+function renderBookings(bookings) {
+    tableBody.innerHTML = "";
 
+    if (bookings.length === 0) {
+        tableBody.innerHTML = `
+            <tr><td colspan="7">No bookings found.</td></tr>
+        `;
+        return;
+    }
 
-  allBookings.push({
-    id: bookingId,
-    ...data
-});
+    bookings.forEach(booking => {
+        const row = document.createElement("tr");
 
-  const row = `
-  <tr>
-    <td>${data.name || "N/A"}</td>
-    <td>${data.phone || "N/A"}</td>
-    <td>${data.date || "N/A"}</td>
-    <td>${data.timings || "N/A"}</td>
-    <td>${data.eventType || "N/A"}</td>
-    <td>${data.email || "N/A"}</td>
+        const values = [
+            booking.name || "N/A",
+            booking.phone || "N/A",
+            booking.date || "N/A",
+            booking.timings || "N/A",
+            booking.eventType || "N/A",
+            booking.email || "N/A"
+        ];
 
-    <td>
-      <button class="edit-btn" onclick="editBooking('${bookingId}')">
-        <i class="fas fa-edit"></i>
-        Edit
-      </button>
+        values.forEach(value => {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.appendChild(cell);
+        });
 
-      <button class="delete-btn" onclick="deleteBooking('${bookingId}')">
-        <i class="fas fa-trash"></i> 
-        Delete
-      </button>
-    </td>
-  </tr>
-  `;
+        // ACTIONS COLUMN
+        const actionCell = document.createElement("td");
 
-  tableBody.innerHTML += row;
-});
+        const editButton = document.createElement("button");
+        editButton.textContent = "Edit";
+        editButton.className = "edit-btn";
 
+        editButton.addEventListener("click", () => {
+            window.editBooking(booking.id);
+        });
 
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "Delete";
+        deleteButton.className = "delete-btn";
 
-  } catch (error) {
-    console.error(error);
-    alert("Error loading bookings");
-  }
+        deleteButton.addEventListener("click", () => {
+            window.deleteBooking(booking.id);
+        });
 
+        actionCell.appendChild(editButton);
+        actionCell.appendChild(deleteButton);
 
-  window.deleteBooking = async function(id) {
+        row.appendChild(actionCell);
+        tableBody.appendChild(row);
+    });
+}
 
-  const confirmDelete =
-    confirm("Delete this booking?");
+// --------------------------------------
+// SEARCH BOOKINGS
+// --------------------------------------
 
-  if (!confirmDelete) return;
+function applySearch() {
+    const searchText = searchInput?.value.toLowerCase().trim() || "";
 
-  await deleteDoc(doc(db, "bookings", id));
-
-  alert("Booking deleted successfully");
-
-  location.reload();
-};
-
-//Edit function
-window.editBooking = async function(id) {
-
-  const choice = prompt(
-`What do you want to edit?
-
-1 - Name
-2 - Phone
-3 - Date
-4 - Timings
-5 - Event Type
-6 - Email ID`
-  );
-
-  let updateData = {};
-
-  switch(choice){
-
-    case "1":
-      updateData.name =
-        prompt("Enter new name:");
-      break;
-
-    case "2":
-      updateData.phone =
-        prompt("Enter new phone number:");
-      break;
-
-    case "3":
-      updateData.date =
-        prompt("Enter new date (YYYY-MM-DD):");
-      break;
-
-    case "4":
-      updateData.timings =
-        prompt("Enter new timing:");
-      break;
-
-    case "5":
-      updateData.eventType =
-        prompt("Enter new event type:");
-      break;
-    case "6":
-      updateData.email = 
-       prompt("Enter the new Email ID");
-      break;
-
-    default:
-      alert("Invalid choice");
-      return;
-  }
-
-  await updateDoc(
-    doc(db, "bookings", id),
-    updateData
-  );
-
-  alert("Booking updated successfully");
-
-  location.reload();
-};
-
-
-document.getElementById("searchBooking")
-.addEventListener("keyup", function () {
-
-    const searchText =
-        this.value.toLowerCase();
-
-    const rows =
-        document.querySelectorAll("#tableBody tr");
-
-    rows.forEach((row) => {
-
-        const text =
-            row.textContent.toLowerCase();
-
-        if (text.includes(searchText)) {
-            row.style.display = "";
-        } else {
-            row.style.display = "none";
-        }
-
+    const filteredBookings = allBookings.filter(booking => {
+        return [
+            booking.name,
+            booking.phone,
+            booking.date,
+            booking.timings,
+            booking.eventType,
+            booking.email
+        ].some(value =>
+            String(value ?? "").toLowerCase().includes(searchText)
+        );
     });
 
+    renderBookings(filteredBookings);
+}
+
+if (searchInput) {
+    searchInput.addEventListener("input", applySearch);
+}
+
+// --------------------------------------
+// RESET SEARCH
+// --------------------------------------
+
+window.resetSearch = function () {
+    if (searchInput) {
+        searchInput.value = "";
+    }
+
+    renderBookings(allBookings);
+};
+
+// --------------------------------------
+// EDIT BOOKING
+// --------------------------------------
+
+window.editBooking = async function (id) {
+    const booking = allBookings.find(item => item.id === id);
+
+    if (!booking) {
+        alert("Booking not found.");
+        return;
+    }
+
+    const fields = [
+        { key: "name", label: "Name" },
+        { key: "phone", label: "Phone" },
+        { key: "date", label: "Date (YYYY-MM-DD)" },
+        { key: "timings", label: "Timings" },
+        { key: "eventType", label: "Event Type" },
+        { key: "email", label: "Email ID" }
+    ];
+
+    const choice = prompt(
+        "What do you want to edit?\n\n" +
+        fields.map((field, index) =>
+            `${index + 1} - ${field.label}`
+        ).join("\n")
+    );
+
+    if (choice === null) return;
+
+    const selectedField = fields[Number(choice) - 1];
+
+    if (!selectedField) {
+        alert("Invalid choice.");
+        return;
+    }
+
+    const newValue = prompt(
+        `Enter new ${selectedField.label}:`,
+        booking[selectedField.key] || ""
+    );
+
+    if (newValue === null) return;
+
+    const value = newValue.trim();
+
+    if (!value) {
+        alert("Value cannot be empty.");
+        return;
+    }
+
+    if (selectedField.key === "date" &&
+        !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        alert("Please enter the date in YYYY-MM-DD format.");
+        return;
+    }
+
+    try {
+        await updateDoc(doc(db, "bookings", id), {
+            [selectedField.key]: value
+        });
+
+        alert("Booking updated successfully!");
+
+        await loadBookings();
+
+    } catch (error) {
+        console.error("Booking update error:", error);
+        alert("Unable to update booking.");
+    }
+};
+
+// --------------------------------------
+// DELETE BOOKING
+// --------------------------------------
+
+window.deleteBooking = async function (id) {
+    const confirmed = confirm(
+        "Are you sure you want to delete this booking?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+        await deleteDoc(doc(db, "bookings", id));
+
+        alert("Booking deleted successfully!");
+
+        await loadBookings();
+
+    } catch (error) {
+        console.error("Booking deletion error:", error);
+        alert("Unable to delete booking.");
+    }
+};
+
+// --------------------------------------
+// DOWNLOAD BOOKINGS AS CSV
+// --------------------------------------
+
+window.downloadExcel = function () {
+    if (allBookings.length === 0) {
+        alert("No bookings available to download.");
+        return;
+    }
+
+    const headers = [
+        "Name",
+        "Phone",
+        "Date",
+        "Timings",
+        "Event Type",
+        "Email"
+    ];
+
+    const rows = allBookings.map(booking => [
+        booking.name,
+        booking.phone,
+        booking.date,
+        booking.timings,
+        booking.eventType,
+        booking.email
+    ]);
+
+    const escapeCSV = value =>
+        `"${String(value ?? "").replace(/"/g, '""')}"`;
+
+    const csvContent = [
+        headers,
+        ...rows
+    ].map(row =>
+        row.map(escapeCSV).join(",")
+    ).join("\n");
+
+    const blob = new Blob(
+        ["\uFEFF" + csvContent],
+        { type: "text/csv;charset=utf-8;" }
+    );
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "Krishna_Mahal_Bookings.csv";
+    link.click();
+
+    URL.revokeObjectURL(url);
+};
+
+// --------------------------------------
+// ADMIN AUTHENTICATION
+// --------------------------------------
+
+onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+
+    if (user.uid !== ADMIN_UID) {
+        alert("Unauthorized access.");
+        return;
+    }
+
+    await loadBookings();
 });

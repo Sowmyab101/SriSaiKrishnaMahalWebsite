@@ -53,193 +53,59 @@ if(toggle && floating){
       floating.classList.toggle("active");
   });
 }
-
-
-
-
-
-
-
-document.addEventListener("DOMContentLoaded", () => {
-
-
-  // Admin protection
-  if (!localStorage.getItem("adminLoggedIn")) {
-    const dashboard = document.getElementById("dashboard");
-    if (dashboard) {
-      dashboard.style.display = "none";
-    }
-  }
-
-});
-
 function toggleFields() {
+    const type = document.getElementById("uploadType")?.value;
 
-    const type =
-        document.getElementById("uploadType").value;
+    const facilitySection = document.getElementById("facilitySection");
+    const gallerySection = document.getElementById("gallerySection");
 
-    const facilitySection =
-        document.getElementById("facilitySection");
+    if (!facilitySection || !gallerySection) return;
 
-    const gallerySection =
-        document.getElementById("gallerySection");
-    
     facilitySection.style.display = "none";
     gallerySection.style.display = "none";
 
-    if(type === "facilities"){
+    if (type === "facilities") {
         facilitySection.style.display = "block";
-    }
-    else if (type === "gallery"){
+    } else if (type === "gallery") {
         gallerySection.style.display = "block";
     }
 }
 
 
 
-async function uploadImage() {
 
-    const file = document.getElementById("imageUpload").files[0];
+function downloadExcel() {
+    const table = document.getElementById("bookingTable");
 
-    if (!file) {
-        alert("Please select an image.");
+    if (!table) {
+        alert("Booking table not found.");
         return;
     }
 
-    const formData = new FormData();
+    const rows = table.querySelectorAll("tr");
+    const csv = [];
 
-    formData.append("image", file);
-    formData.append("type", "gallery");
+    rows.forEach(row => {
+        const cols = row.querySelectorAll("th, td");
 
-    try {
-
-        const response = await fetch("https://mini-mahal-backend.onrender.com/upload", {
-            method: "POST",
-            body: formData
+        const rowData = Array.from(cols).map(col => {
+            const value = col.innerText.replace(/"/g, '""');
+            return `"${value}"`;
         });
 
-        const result = await response.json();
-
-        if (result.success) {
-            alert("🎉 Image uploaded successfully!");
-            console.log(result);
-
-            // We'll replace this with a preview refresh later.
-            document.getElementById("imageUpload").value = "";
-
-        } else {
-            alert(result.message);
-        }
-
-    } catch (err) {
-
-        console.error(err);
-        alert("Upload failed.");
-
-    }
-
-}
-
-
-function downloadExcel(){
-
-  let table = document.getElementById("bookingTable");
-  let rows = table.querySelectorAll("tr");
-
-  let csv = [];
-
-  rows.forEach(row => {
-    let cols = row.querySelectorAll("th, td");
-    let rowData = [];
-
-    cols.forEach(col => {
-      rowData.push(col.innerText);
+        csv.push(rowData.join(","));
     });
 
-    csv.push(rowData.join(","));
-  });
+    const csvString = csv.join("\n");
+    const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+    const url = window.URL.createObjectURL(blob);
 
-  let csvString = csv.join("\n");
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "bookings.csv";
+    a.click();
 
-  let blob = new Blob([csvString], { type: "text/csv" });
-  let url = window.URL.createObjectURL(blob);
-
-  let a = document.createElement("a");
-  a.href = url;
-  a.download = "bookings.csv";
-  a.click();
-
-  window.URL.revokeObjectURL(url);
-}
-
-async function addFacility() {
-
-    const name = document.getElementById("facilityName").value.trim();
-
-    const description = document.getElementById("facilityDescription").value.trim();
-
-    const file = document.getElementById("facilityImage").files[0];
-
-    if (!name) {
-        alert("Please enter the facility name.");
-        return;
-    }
-
-    if (!description) {
-        alert("Please enter the facility description.");
-        return;
-    }
-
-    if (!file) {
-        alert("Please select an image.");
-        return;
-    }
-
-    const formData = new FormData();
-
-    formData.append("image", file);
-    formData.append("type", "facilities");
-    formData.append("name", name);
-    formData.append("description", description);
-
-    try {
-
-        const response = await fetch("https://mini-mahal-backend.onrender.com/upload", {
-
-            method: "POST",
-            body: formData
-
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-
-            alert("🎉 Facility added successfully!");
-
-            // Clear form
-            document.getElementById("facilityName").value = "";
-            document.getElementById("facilityDescription").value = "";
-            document.getElementById("facilityImage").value = "";
-
-            // Refresh admin preview
-            if (typeof loadFacilitiesPreview === "function") {
-                loadFacilitiesPreview();
-            }
-
-        } else {
-
-            alert(result.message);
-
-        }
-
-    } catch (err) {
-
-        console.error(err);
-        alert("Upload failed.");
-
-    }
-
+    window.URL.revokeObjectURL(url);
 }
 
 window.onload = function () {
@@ -253,13 +119,15 @@ window.onload = function () {
 
 // Reset function
 function resetSearch() {
+    const searchInput = document.getElementById("searchBooking");
 
-    document.getElementById("searchBooking").value = "";
+    if (searchInput) {
+        searchInput.value = "";
+    }
 
     const rows = document.querySelectorAll("#tableBody tr");
 
-    rows.forEach((row) => {
+    rows.forEach(row => {
         row.style.display = "";
     });
-
 }

@@ -1,251 +1,252 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import {
-  getFirestore,
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  where
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBj0vfVWokM6qSBXVIyrNB-YZrOTMLANmM",
-    authDomain: "myfirstproject-1cc9f.firebaseapp.com",
-    projectId: "myfirstproject-1cc9f"
-  };
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+// --------------------------------------
+// BOOKING PAGE - FIREBASE BACKEND API
+// --------------------------------------
 
+const API_URL = "https://mini-mahal-backend.onrender.com";
 
-  const tableBody = document.querySelector("#bookingTable tbody");
+// --------------------------------------
+// POPUP
+// --------------------------------------
 
-window.openPopup = function(){
-  document.getElementById("popup").style.display = "block";
-}
+window.openPopup = function () {
+    const popup = document.getElementById("popup");
 
-  document.getElementById("bookingForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const name = document.getElementById("username").value;
-  const phone = document.getElementById("userphone").value
-  const eventType = document.getElementById("eventType").value;
-  const date = document.getElementById("bookingdate").value;
-  const timings = document.getElementById("timings").value;
-  const email = document.getElementById("email").value.trim();
-
-  console.log("DEBUG:", name, phone, eventType, date, timings, email);
-
-  // ✅ VALIDATION
-  if (!name || !phone || !eventType || !date || !timings || !email) {
-    alert("Please fill all fields ❌");
-    return;
-  }
-
-  const booking = {
-    name: name,
-    phone: phone,
-    eventType: eventType,
-    date: date,
-    timings: timings,
-    email: email,
-    createdAt: new Date()
-  };
-
-  try {
-    // 🔍 CHECK IF DATE ALREADY BOOKED
-    const q = query(
-      collection(db, "bookings"),
-      where("date", "==", date),
-      where("timings", "==", timings)
-    );
-    const snapshot = await getDocs(q);
-
-    if (!snapshot.empty) {
-      alert("This date is already booked ❌");
-      return;
+    if (popup) {
+        popup.style.display = "block";
     }
+};
 
-    // ✅ SAVE BOOKING
-    await addDoc(collection(db, "bookings"), booking);
-    // Send email notification
-    const response = await fetch("https://mini-mahal-backend.onrender.com/website-booking", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(booking)
-});
+// --------------------------------------
+// BOOKING FORM SUBMISSION
+// --------------------------------------
 
-const result = await response.json();
+const bookingForm = document.getElementById("bookingForm");
 
-console.log(result);
+if (bookingForm) {
 
-    alert("Booking Successful ✅");
-    document.getElementById("bookingForm").reset();
+    bookingForm.addEventListener("submit", async (e) => {
 
-  } catch (error) {
-    console.error(error);
-    alert("Error submitting booking ❌");
-  }
-});
+        e.preventDefault();
 
-window.submitBooking = async function(){
+        const name = document.getElementById("username").value.trim();
+        const phone = document.getElementById("userphone").value.trim();
+        const eventType = document.getElementById("eventType").value;
+        const date = document.getElementById("bookingdate").value;
+        const timings = document.getElementById("timings").value;
+        const email = document.getElementById("email").value.trim();
 
-  let bookingData = {
+        // Validate fields
+        if (!name || !phone || !eventType || !date || !timings || !email) {
+            alert("Please fill all fields ❌");
+            return;
+        }
 
-    name: document.getElementById("name").value,
+        const booking = {
+            name,
+            phone,
+            eventType,
+            date,
+            timings,
+            email
+        };
 
-    phone: document.getElementById("phone").value,
+        const submitButton = bookingForm.querySelector('[type="submit"]');
 
-    date: document.getElementById("date").value,
+        try {
 
-    functionType: document.getElementById("functionType").value,
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.textContent = "Submitting...";
+            }
 
-    timings: document.getElementById("timings").value,
+            // Send booking to Render backend
+            const response = await fetch(`${API_URL}/website-booking`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(booking)
+            });
 
-    email: document.getElementById("email").value,
+            const result = await response.json();
 
-    createdAt: new Date()
+            if (!response.ok || !result.success) {
 
-  };
+                if (response.status === 409) {
+                    alert("This date and timing are already booked ❌");
+                } else {
+                    alert(result.message || "Error submitting booking ❌");
+                }
 
-  // SAVE TO FIREBASE
+                return;
+            }
 
-  await addDoc(
-    collection(db, "whatsappBookings"),
-    bookingData
-  );
+            if (result.emailSent) {
+                alert("Booking Successful! Confirmation email sent ✅");
+            } else {
+                alert("Booking Successful! However, confirmation email could not be sent. Please contact the Mahal.");
+            }
 
-  
-  // OPEN WHATSAPP
+            bookingForm.reset();
 
-  window.open(
-    `https://wa.me/919000000?text=${encodedMessage}`,
-    "_blank"
-  );
+            // Refresh calendar after successful booking
+            loadBookedDates();
+
+        } catch (error) {
+
+            console.error("Booking submission error:", error);
+
+            alert("Unable to connect to the booking server. Please try again.");
+
+        } finally {
+
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = "Book Now";
+            }
+
+        }
+
+    });
 
 }
+
+
+// --------------------------------------
+// FULLCALENDAR INITIALIZATION
+// --------------------------------------
 
 const calendarEl = document.getElementById("calendar");
 
-const calendar = new FullCalendar.Calendar(calendarEl, {
+let calendar = null;
 
-    initialView: "dayGridMonth",
+if (calendarEl && typeof FullCalendar !== "undefined") {
 
-    height: 400,
+    calendar = new FullCalendar.Calendar(calendarEl, {
 
-    dateClick: function(info) {
+        initialView: "dayGridMonth",
 
-        document.getElementById("bookingdate").value =
-            info.dateStr;
+        height: 400,
 
-    },
+        dateClick: function (info) {
 
-    datesSet: function() {
+            const bookingDate = document.getElementById("bookingdate");
 
-        // Reload availability whenever the user
-        // moves to another month
-        loadBookedDates();
+            if (bookingDate) {
+                bookingDate.value = info.dateStr;
+            }
 
-    }
+        },
 
-});
+        datesSet: function () {
 
-calendar.render();
+            loadBookedDates();
+
+        }
+
+    });
+
+    calendar.render();
+
+}
 
 
-document.getElementById("calendarTiming")
-    .addEventListener("change", loadBookedDates);
+// --------------------------------------
+// CALENDAR TIMING CHANGE
+// --------------------------------------
 
+const calendarTiming = document.getElementById("calendarTiming");
+
+if (calendarTiming) {
+
+    calendarTiming.addEventListener("change", loadBookedDates);
+
+}
+
+
+// --------------------------------------
+// LOAD PUBLIC BOOKING AVAILABILITY
+// --------------------------------------
 
 async function loadBookedDates() {
 
-    const selectedTiming =
-        document.getElementById("calendarTiming").value;
+    if (!calendar) return;
 
-    // Clear existing Available / Booked labels
+    const selectedTiming = calendarTiming?.value;
+
     calendar.removeAllEvents();
 
-    // User must select a timing first
     if (!selectedTiming) return;
-
 
     try {
 
-        // Get all bookings from Firebase
-        const snapshot =
-            await getDocs(collection(db, "bookings"));
-
-
-        // Store dates that are already booked
-        const bookedDates = new Set();
-
-
-        snapshot.forEach((doc) => {
-
-            const booking = doc.data();
-
-            if (booking.timings === selectedTiming) {
-
-                bookedDates.add(booking.date);
-
-            }
-
-        });
-
-
-        // Get the currently displayed month
         const currentDate = calendar.getDate();
 
         const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
 
+        const month = String(currentDate.getMonth() + 1).padStart(2, "0");
 
-        // Number of days in the current month
-        const daysInMonth =
-            new Date(year, month + 1, 0).getDate();
+        const monthString = `${year}-${month}`;
 
+        // Request public availability from Render
+        const response = await fetch(
+            `${API_URL}/public-availability?month=${monthString}`
+        );
 
-        // Today's date
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || "Unable to load availability");
+        }
+
+        // Store booked dates for selected timing
+        const bookedDates = new Set(
+            result.bookedSlots
+                .filter(slot => slot.timings === selectedTiming)
+                .map(slot => slot.date)
+        );
+
+        // Get number of days in current month
+        const daysInMonth = new Date(year, currentDate.getMonth() + 1, 0).getDate();
+
+        // Today's date in local timezone
         const today = new Date();
 
         today.setHours(0, 0, 0, 0);
 
-
-        // Add Available / Booked status
+        // Display availability
         for (let day = 1; day <= daysInMonth; day++) {
 
-            const date = new Date(year, month, day);
+            const date = new Date(year, currentDate.getMonth(), day);
 
             const dateStr =
-                `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+                `${year}-${month}-${String(day).padStart(2, "0")}`;
 
-
-            // Don't show "Available" for past dates
+            // Skip past dates
             if (date < today) {
                 continue;
             }
 
-
             if (bookedDates.has(dateStr)) {
 
-                // 🔴 BOOKED
+                // BOOKED
                 calendar.addEvent({
-    start: dateStr,
-    title: "🔴",
-    color: "transparent",
-    textColor: "#FF0000"
-});
+                    start: dateStr,
+                    title: "🔴",
+                    color: "transparent",
+                    textColor: "#FF0000"
+                });
 
             } else {
 
-                // 🟢 AVAILABLE
+                // AVAILABLE
                 calendar.addEvent({
-    start: dateStr,
-    title: "🟢",
-    color: "transparent",
-    textColor: "#25D366"
-});
+                    start: dateStr,
+                    title: "🟢",
+                    color: "transparent",
+                    textColor: "#25D366"
+                });
 
             }
 
@@ -253,10 +254,7 @@ async function loadBookedDates() {
 
     } catch (error) {
 
-        console.error(
-            "Error loading booking availability:",
-            error
-        );
+        console.error("Availability loading error:", error);
 
     }
 
